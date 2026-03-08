@@ -3,676 +3,385 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ConnectPro | Safe Communication</title>
-    <!-- Tailwind CSS for styling -->
+    <title>ConnectPro | Terminal</title>
+    <!-- Reliable CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@0.263.0"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow: hidden;
-            background-color: #f0f7ff;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(37, 99, 235, 0.2);
-            border-radius: 10px;
-        }
-
-        .sidebar-active {
-            background-color: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            box-shadow: inset 4px 0 0 #60a5fa;
-        }
-
-        .modal-overlay {
-            background-color: rgba(7, 25, 53, 0.9);
-            backdrop-filter: blur(12px);
-        }
-
-        .chat-bubble-me {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            border-radius: 20px 20px 4px 20px;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
-        }
-
-        .chat-bubble-them {
-            background-color: #ffffff;
-            color: #1e3a8a;
-            border-radius: 20px 20px 20px 4px;
-            border: 1px solid #dbeafe;
-        }
-
-        .blue-gradient-header {
-            background: linear-gradient(135deg, #1e3a8a, #2563eb);
-            color: white;
-        }
-
-        @keyframes popIn {
-            0% { transform: scale(0.95); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .animate-pop {
-            animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        /* Avatar Selection Styles */
-        .avatar-option {
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 4px solid transparent;
-        }
-        .avatar-option.selected {
-            border-color: #2563eb;
-            background-color: #dbeafe;
-            transform: scale(1.05);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; height: 100vh; overflow: hidden; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .blue-gradient { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .tab-active { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .msg-me { background: #2563eb; border-radius: 18px 18px 4px 18px; }
+        .msg-them { background: #334155; border-radius: 18px 18px 18px 4px; }
+        input, textarea { background: #1e293b !important; border: 1px solid #334155 !important; color: white !important; }
+        .avatar-box { transition: all 0.2s; cursor: pointer; border: 3px solid transparent; }
+        .avatar-box.selected { border-color: #3b82f6; transform: scale(1.05); background: #1e293b; }
     </style>
 </head>
-<body class="h-screen flex items-center justify-center p-0 md:p-4">
+<body>
 
-    <!-- Auth System Overlay -->
-    <div id="auth-overlay" class="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4">
-        <!-- Landing / Login Picker -->
-        <div id="login-container" class="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl animate-pop text-center">
-            <div class="flex flex-col items-center mb-8">
-                <div class="bg-blue-600 p-5 rounded-[2rem] text-white mb-4 shadow-xl shadow-blue-500/40">
-                    <i data-lucide="zap" class="w-10 h-10"></i>
-                </div>
-                <h1 class="text-3xl font-black text-blue-900 tracking-tight">ConnectPro</h1>
-                <p class="text-blue-500 font-bold">Secure Global Interface</p>
+    <!-- AUTH OVERLAY -->
+    <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4">
+        <div id="auth-card" class="glass w-full max-w-md p-8 rounded-[2.5rem] text-center shadow-2xl">
+            <div class="blue-gradient w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20">
+                <i data-lucide="zap" class="text-white w-8 h-8"></i>
+            </div>
+            <h1 class="text-3xl font-black tracking-tight mb-2">ConnectPro</h1>
+            <p class="text-slate-400 text-sm font-medium mb-8">Secure Communication Node</p>
+
+            <div id="user-selector" class="mb-6 space-y-3 hidden">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Stored Sessions</p>
+                <div id="user-list" class="max-h-40 overflow-y-auto custom-scrollbar space-y-2"></div>
+                <div class="py-4 flex items-center gap-4 text-slate-600"><hr class="flex-1 border-slate-800"> OR <hr class="flex-1 border-slate-800"></div>
             </div>
 
-            <div id="accounts-list-section" class="mb-6 hidden text-left">
-                <label class="block text-[10px] font-black text-blue-400 uppercase tracking-widest mb-4 text-center">Active Sessions</label>
-                <div id="accounts-grid" class="space-y-3 max-h-48 overflow-y-auto custom-scrollbar p-1"></div>
-                <div class="relative my-8">
-                    <div class="absolute inset-0 flex items-center"><span class="w-full border-t border-blue-50"></span></div>
-                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-4 text-blue-300 font-bold tracking-widest">or</span></div>
-                </div>
-            </div>
-            
-            <button onclick="showRegistration()" class="w-full flex items-center justify-center gap-3 bg-blue-50 hover:bg-blue-100 text-blue-600 font-black py-5 rounded-2xl transition-all border border-blue-100">
-                <i data-lucide="user-plus" class="w-5 h-5"></i>
-                Create New Identity
+            <button onclick="toggleRegister(true)" class="w-full py-4 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold transition-all flex items-center justify-center gap-2">
+                <i data-lucide="user-plus" class="w-4 h-4"></i> Create New ID
             </button>
         </div>
 
-        <!-- Registration Form -->
-        <div id="register-container" class="hidden bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl animate-pop">
-            <button onclick="showLogin()" class="mb-6 text-blue-400 hover:text-blue-900 flex items-center gap-2 font-black text-xs uppercase tracking-widest transition-colors">
-                <i data-lucide="chevron-left" class="w-4 h-4"></i> Back
-            </button>
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-black text-blue-900">New Identity</h2>
-                <p class="text-sm text-blue-400 font-bold">Pick your digital representative</p>
-            </div>
+        <!-- REGISTRATION MODAL -->
+        <div id="reg-modal" class="hidden glass w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl">
+            <h2 class="text-xl font-black mb-2">Initialize Identity</h2>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-4 text-center">Select Profile Picture</p>
+            <div class="grid grid-cols-4 gap-3 mb-6 max-h-48 overflow-y-auto p-2 custom-scrollbar bg-slate-900/30 rounded-2xl" id="avatar-grid"></div>
             
-            <div class="space-y-6">
-                <!-- Diverse Avatar Grid -->
-                <div id="reg-avatar-grid" class="grid grid-cols-4 gap-3 max-h-40 overflow-y-auto custom-scrollbar p-1">
-                    <!-- Avatars injected by JS -->
+            <div class="space-y-3">
+                <input type="text" id="reg-name" placeholder="Display Name" class="w-full p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold">
+                <div class="relative mb-6">
+                    <input type="text" id="reg-handle" placeholder="username" class="w-full p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold pr-32">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs">@connect.pro</span>
                 </div>
+            </div>
 
-                <div class="space-y-4">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest ml-4">Full Name</label>
-                        <input type="text" id="reg-name" placeholder="E.g. Taylor Swift" class="w-full px-6 py-4 rounded-2xl bg-blue-50 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold text-blue-900 placeholder-blue-300">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest ml-4">Mail ID</label>
-                        <div class="relative">
-                            <input type="text" id="reg-handle" placeholder="username" class="w-full px-6 py-4 rounded-2xl bg-blue-50 border-none focus:ring-2 focus:ring-blue-500 outline-none pr-32 font-bold text-blue-900 placeholder-blue-300">
-                            <span class="absolute right-6 top-1/2 -translate-y-1/2 text-blue-400 font-black text-xs">@connect.pro</span>
-                        </div>
-                    </div>
-                </div>
-
-                <button onclick="handleRegister()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-blue-500/40 text-lg">
-                    Initialize Account
-                </button>
+            <div class="flex gap-3 mt-6">
+                <button onclick="toggleRegister(false)" class="flex-1 py-4 font-bold text-slate-400">Cancel</button>
+                <button onclick="handleSignup()" class="flex-1 py-4 blue-gradient rounded-xl font-black shadow-lg shadow-blue-500/20">Launch</button>
             </div>
         </div>
     </div>
 
-    <!-- Main App Interface -->
-    <div id="main-app" class="hidden w-full h-full max-w-7xl bg-white md:rounded-[3rem] shadow-2xl flex flex-col overflow-hidden border border-blue-100">
-        
-        <!-- App Header -->
-        <header class="blue-gradient-header px-8 py-5 flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-4">
-                <div class="bg-white/20 p-2.5 rounded-2xl text-white backdrop-blur-md">
-                    <i data-lucide="zap" class="w-6 h-6"></i>
+    <!-- MAIN INTERFACE -->
+    <div id="app-interface" class="hidden flex h-screen w-full">
+        <!-- Sidebar -->
+        <div class="w-20 lg:w-72 bg-slate-900 border-r border-slate-800 flex flex-col">
+            <div class="p-6 flex items-center gap-4">
+                <div class="blue-gradient w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+                    <i data-lucide="zap" class="text-white w-5 h-5"></i>
                 </div>
-                <span class="font-black text-2xl tracking-tighter">ConnectPro</span>
+                <span class="hidden lg:block font-black text-xl tracking-tighter">ConnectPro</span>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="bg-white/10 px-5 py-2.5 rounded-2xl flex items-center gap-3 border border-white/10 backdrop-blur-md">
-                    <img id="header-avatar" src="" class="w-7 h-7 rounded-xl object-cover bg-white">
-                    <span id="header-name" class="text-sm font-bold"></span>
-                </div>
-                <button onclick="logout()" class="w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-red-500 rounded-2xl transition-all">
-                    <i data-lucide="log-out" class="w-5 h-5 text-white"></i>
+
+            <nav class="flex-1 px-4 space-y-2 mt-4">
+                <button onclick="switchTab('mail')" id="btn-mail" class="w-full p-4 rounded-xl flex items-center gap-4 transition-all font-bold tab-active">
+                    <i data-lucide="mail" class="w-5 h-5"></i>
+                    <span class="hidden lg:block text-sm">Transmissions</span>
                 </button>
-            </div>
-        </header>
+                <button onclick="switchTab('chat')" id="btn-chat" class="w-full p-4 rounded-xl flex items-center gap-4 transition-all font-bold text-slate-400 hover:bg-slate-800">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i>
+                    <span class="hidden lg:block text-sm">Active Nodes</span>
+                </button>
+            </nav>
 
-        <div class="flex flex-1 overflow-hidden">
-            <!-- Sidebar -->
-            <aside class="w-20 md:w-72 bg-blue-900 text-blue-100 flex flex-col shrink-0">
-                <div class="p-6 space-y-3">
-                    <button onclick="setTab('mail')" id="tab-mail" class="w-full flex items-center gap-5 px-6 py-5 rounded-2xl transition-all font-black sidebar-active">
-                        <i data-lucide="mail" class="w-5 h-5"></i>
-                        <span class="hidden md:inline text-sm">Transmissions</span>
-                    </button>
-                    <button onclick="setTab('chat')" id="tab-chat" class="w-full flex items-center gap-5 px-6 py-5 rounded-2xl transition-all font-black hover:bg-white/5">
-                        <i data-lucide="messages-square" class="w-5 h-5"></i>
-                        <span class="hidden md:inline text-sm">Nodes</span>
-                    </button>
+            <div class="p-4 border-t border-slate-800">
+                <div class="bg-slate-800/50 p-3 rounded-2xl flex items-center gap-3">
+                    <img id="user-avatar" src="" class="w-10 h-10 rounded-xl bg-slate-700">
+                    <div class="hidden lg:block overflow-hidden">
+                        <p id="user-name" class="font-bold text-sm truncate"></p>
+                        <p id="user-email" class="text-[10px] text-slate-500 truncate"></p>
+                    </div>
+                    <button onclick="logout()" class="ml-auto p-2 hover:text-red-400"><i data-lucide="log-out" class="w-4 h-4"></i></button>
                 </div>
+            </div>
+        </div>
 
-                <!-- Contextual Nav -->
-                <div class="flex-1 flex flex-col px-4 overflow-hidden mt-4">
-                    <div class="h-px bg-white/10 mb-6 mx-2"></div>
-                    
-                    <!-- Mail Folders -->
-                    <div id="mail-nav" class="space-y-1">
-                        <div class="px-6 text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Mail Hub</div>
-                        <button class="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-white/5 font-bold text-xs">
-                            <div class="flex items-center gap-3">
-                                <i data-lucide="inbox" class="w-4 h-4"></i>
-                                <span class="hidden md:inline">Inbox</span>
-                            </div>
-                            <span id="mail-count" class="bg-blue-500 px-2 py-0.5 rounded-lg text-[10px]">0</span>
+        <!-- Content Area -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-slate-950">
+            <!-- Mail View -->
+            <div id="view-mail" class="flex h-full">
+                <div class="w-full md:w-80 border-r border-slate-900 flex flex-col">
+                    <div class="p-6">
+                        <button onclick="openModal('compose')" class="w-full py-4 blue-gradient rounded-xl font-black text-sm shadow-lg flex items-center justify-center gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i> New Message
                         </button>
                     </div>
-
-                    <!-- Chat Nodes -->
-                    <div id="chat-nav" class="hidden flex-1 flex flex-col overflow-hidden">
-                        <div class="px-6 text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Active Nodes</div>
-                        <div id="rooms-list" class="flex-1 overflow-y-auto custom-scrollbar space-y-1 pr-2">
-                            <!-- Injected Rooms -->
-                        </div>
-                        <div class="mt-4 grid grid-cols-2 gap-2 mb-6">
-                            <button onclick="openRoomModal('join')" class="bg-blue-800 hover:bg-blue-700 text-white py-4 rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2">
-                                <i data-lucide="key" class="w-3 h-3"></i> Join
-                            </button>
-                            <button onclick="openRoomModal('create')" class="bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2 shadow-lg shadow-blue-950">
-                                <i data-lucide="plus" class="w-3 h-3"></i> New
-                            </button>
-                        </div>
-                    </div>
+                    <div id="inbox-list" class="flex-1 overflow-y-auto custom-scrollbar px-4 space-y-2"></div>
                 </div>
-            </aside>
-
-            <!-- Main Panel -->
-            <main class="flex-1 flex flex-col bg-white overflow-hidden">
-                
-                <!-- Tab 1: Mail View -->
-                <div id="view-mail" class="flex h-full overflow-hidden">
-                    <!-- Email Sidebar -->
-                    <div class="w-full md:w-[380px] border-r border-blue-50 flex flex-col shrink-0 bg-blue-50/20">
-                        <div class="p-8">
-                            <button onclick="openCompose()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-200 flex items-center justify-center gap-3 transition-all">
-                                <i data-lucide="plus-circle" class="w-5 h-5"></i> New Message
-                            </button>
-                        </div>
-                        <div id="mail-list" class="flex-1 overflow-y-auto custom-scrollbar px-4 space-y-2 pb-10">
-                            <!-- Injected Emails -->
-                        </div>
+                <div class="hidden md:flex flex-1 items-center justify-center p-12 text-center text-slate-600">
+                    <div id="mail-reader-empty">
+                        <i data-lucide="mail-open" class="w-16 h-16 mx-auto mb-4 opacity-20"></i>
+                        <p class="font-bold">Select a transmission to decrypt</p>
                     </div>
-                    
-                    <!-- Email Detail -->
-                    <div id="mail-detail" class="flex-1 flex flex-col bg-white overflow-y-auto custom-scrollbar">
-                        <div id="mail-welcome" class="flex-1 flex flex-col items-center justify-center text-blue-100 p-20 text-center">
-                            <div class="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-8">
-                                <i data-lucide="mail-open" class="w-16 h-16 text-blue-200"></i>
-                            </div>
-                            <h3 class="text-2xl font-black text-blue-200">Select a secure transmission</h3>
-                        </div>
-                        <div id="mail-content" class="hidden p-12 md:p-20 max-w-4xl mx-auto w-full animate-pop">
-                            <!-- Injected Content -->
-                        </div>
-                    </div>
+                    <div id="mail-reader-content" class="hidden w-full max-w-2xl text-left bg-slate-900/50 p-10 rounded-3xl border border-slate-800"></div>
                 </div>
+            </div>
 
-                <!-- Tab 2: Chat View -->
-                <div id="view-chat" class="hidden flex h-full overflow-hidden">
-                    <div id="chat-welcome" class="flex-1 flex flex-col items-center justify-center bg-blue-50/10 p-10 text-center">
-                        <div class="bg-white p-12 rounded-[3rem] shadow-2xl border border-blue-50 max-w-sm">
-                            <div class="w-20 h-20 bg-blue-600 rounded-[2rem] mx-auto mb-6 flex items-center justify-center text-white shadow-xl">
-                                <i data-lucide="message-square" class="w-10 h-10"></i>
-                            </div>
-                            <h3 class="text-2xl font-black text-blue-900 mb-2">Connect Nodes</h3>
-                            <p class="text-blue-500 font-bold mb-8 text-sm">Join a private channel for end-to-end communication.</p>
-                            <button onclick="openRoomModal('join')" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black shadow-lg">Enter Access Key</button>
-                        </div>
+            <!-- Chat View -->
+            <div id="view-chat" class="hidden flex h-full">
+                <div class="w-full md:w-80 border-r border-slate-900 flex flex-col">
+                    <div class="p-6">
+                        <button onclick="openModal('room')" class="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-black text-sm flex items-center justify-center gap-2">
+                            <i data-lucide="hash" class="w-4 h-4"></i> Join Node
+                        </button>
                     </div>
-
-                    <div id="chat-active" class="hidden flex-1 flex flex-col bg-blue-50/5">
-                        <div class="px-10 py-6 border-b border-blue-50 bg-white flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                                    <i data-lucide="hash" class="w-5 h-5"></i>
-                                </div>
-                                <div>
-                                    <h4 id="active-room-name" class="font-black text-blue-900 text-lg">General</h4>
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                                        <span class="text-[10px] text-blue-400 font-black uppercase tracking-widest">Node Connected</span>
-                                    </div>
-                                </div>
-                            </div>
+                    <div id="room-list" class="flex-1 overflow-y-auto custom-scrollbar px-4 space-y-2"></div>
+                </div>
+                <div id="chat-window" class="flex-1 flex flex-col">
+                    <div id="chat-empty" class="flex-1 flex flex-col items-center justify-center text-slate-600">
+                        <i data-lucide="message-square" class="w-16 h-16 mb-4 opacity-20"></i>
+                        <p class="font-bold">No Node Connected</p>
+                    </div>
+                    <div id="chat-active" class="hidden flex-1 flex flex-col">
+                        <div class="p-6 border-b border-slate-900 bg-slate-900/30 flex justify-between items-center">
+                            <h2 id="active-room-title" class="font-black text-xl"></h2>
+                            <span class="text-[10px] font-bold text-green-500 bg-green-500/10 px-3 py-1 rounded-full uppercase tracking-tighter">Live Connection</span>
                         </div>
-                        <div id="chat-messages" class="flex-1 overflow-y-auto p-8 md:p-12 space-y-8 custom-scrollbar">
-                            <!-- Messages -->
-                        </div>
-                        <div class="p-8 bg-white border-t border-blue-50">
-                            <div class="max-w-4xl mx-auto flex gap-4">
-                                <input id="chat-input" type="text" placeholder="Type a message..." class="flex-1 px-8 py-5 rounded-[2rem] bg-blue-50 border-none focus:ring-2 focus:ring-blue-500 font-bold outline-none text-blue-900">
-                                <button onclick="sendChatMessage()" class="bg-blue-600 hover:bg-blue-700 text-white w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-xl transition-all">
-                                    <i data-lucide="send" class="w-6 h-6"></i>
-                                </button>
+                        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar"></div>
+                        <div class="p-6 bg-slate-900/50">
+                            <div class="flex gap-4">
+                                <input type="text" id="chat-input" placeholder="Secure message..." class="flex-1 p-4 rounded-xl outline-none">
+                                <button onclick="sendMsg()" class="w-14 h-14 blue-gradient rounded-xl flex items-center justify-center shadow-lg"><i data-lucide="send" class="w-5 h-5"></i></button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
+            </div>
+        </main>
     </div>
 
     <!-- Modals -->
-    <!-- Room Modal (Join/Create) -->
-    <div id="modal-room" class="hidden fixed inset-0 z-[110] modal-overlay flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-[3rem] shadow-2xl p-10 animate-pop">
-            <h3 id="room-modal-title" class="text-2xl font-black mb-6 text-blue-900">Room Gateway</h3>
-            <div class="space-y-4">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest ml-4">Node Name</label>
-                    <input id="room-name-input" type="text" placeholder="e.g. Design-Sync" class="w-full px-6 py-4 rounded-2xl bg-blue-50 outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-900">
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest ml-4">Access Code</label>
-                    <input id="room-pass-input" type="password" placeholder="••••••••" class="w-full px-6 py-4 rounded-2xl bg-blue-50 outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-900">
-                </div>
-            </div>
-            <p id="room-error" class="hidden mt-4 text-center text-red-500 text-xs font-black uppercase tracking-widest">Invalid Entry</p>
-            <div class="mt-8 flex gap-4">
-                <button onclick="closeRoomModal()" class="flex-1 py-4 font-black text-blue-300">Cancel</button>
-                <button id="room-confirm-btn" onclick="handleRoomAction()" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg">Authenticate</button>
+    <div id="modal-container" class="hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <!-- Compose -->
+        <div id="modal-compose" class="hidden glass w-full max-w-xl p-8 rounded-[2.5rem] shadow-2xl">
+            <h2 class="text-2xl font-black mb-6">New Transmission</h2>
+            <input type="text" id="mail-to" placeholder="Recipient username" class="w-full p-4 rounded-xl mb-3 outline-none">
+            <input type="text" id="mail-sub" placeholder="Subject" class="w-full p-4 rounded-xl mb-3 outline-none">
+            <textarea id="mail-body" placeholder="Message content..." class="w-full p-4 rounded-xl h-48 mb-4 outline-none resize-none"></textarea>
+            <div class="flex gap-4">
+                <button onclick="closeModal()" class="flex-1 py-4 font-bold text-slate-400">Discard</button>
+                <button onclick="handleSendMail()" class="flex-1 py-4 blue-gradient rounded-xl font-black shadow-lg">Transmit</button>
             </div>
         </div>
-    </div>
-
-    <!-- Compose Mail Modal -->
-    <div id="modal-compose" class="hidden fixed inset-0 z-[110] modal-overlay flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden animate-pop">
-            <div class="bg-blue-900 text-white p-8 flex justify-between items-center">
-                <h3 class="font-black text-xl">Compose Transmission</h3>
-                <button onclick="closeCompose()" class="w-10 h-10 flex items-center justify-center bg-white/10 rounded-xl hover:bg-white/20"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="p-8 space-y-4">
-                <input id="mail-to" type="text" placeholder="Recipient (username or email)" class="w-full px-6 py-4 rounded-2xl bg-blue-50 font-bold outline-none text-blue-900">
-                <input id="mail-subject" type="text" placeholder="Subject Reference" class="w-full px-6 py-4 rounded-2xl bg-blue-50 font-bold outline-none text-blue-900">
-                <textarea id="mail-body" placeholder="Message content..." class="w-full h-48 px-6 py-5 rounded-2xl bg-blue-50 font-medium outline-none resize-none text-blue-900"></textarea>
-                <button onclick="sendMail()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black shadow-xl text-lg mt-4">Send Electronically</button>
+        <!-- Room Join -->
+        <div id="modal-room" class="hidden glass w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl">
+            <h2 class="text-2xl font-black mb-6">Connect to Node</h2>
+            <input type="text" id="room-name" placeholder="Room Name" class="w-full p-4 rounded-xl mb-3 outline-none">
+            <input type="password" id="room-key" placeholder="Access Key" class="w-full p-4 rounded-xl mb-6 outline-none">
+            <div class="flex gap-4">
+                <button onclick="closeModal()" class="flex-1 py-4 font-bold text-slate-400">Cancel</button>
+                <button onclick="handleRoomJoin()" class="flex-1 py-4 blue-gradient rounded-xl font-black shadow-lg">Authenticate</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIG & SEEDS
-        // Expanded seeds including more feminine/diverse options
-        const AVATAR_SEEDS = [
-            'Aria', 'Luna', 'Cleo', 'Zoey', 'Bella', 'Misty', 'Sasha', 'Nala', // Girls
-            'Jasper', 'Felix', 'Simba', 'Oliver', 'Max', 'Toby', 'Oscar', 'Finn' // Boys/Neutral
+        // Expanded State - Diversified Avatars
+        const AVATARS = [
+            'Aria', 'Luna', 'Cleo', 'Zoey', 'Bella', 'Maya', 'Sasha', 'Nala',
+            'Jasper', 'Felix', 'Simba', 'Oliver', 'Max', 'Toby', 'Oscar', 'Finn',
+            'Ruby', 'Jade', 'Skye', 'Ivy', 'Leo', 'Milo', 'Arlo', 'Kai'
         ];
-        
-        // PERSISTENCE STATE (In-memory + LocalStorage)
-        let accounts = JSON.parse(localStorage.getItem('cp_users')) || [];
-        let rooms = JSON.parse(localStorage.getItem('cp_rooms')) || [];
-        let mails = JSON.parse(localStorage.getItem('cp_mails')) || [];
-        let messages = JSON.parse(localStorage.getItem('cp_messages')) || {}; // { room_id: [] }
-        
+        let db = { users: [], mails: [], rooms: [], msgs: {} };
         let currentUser = null;
-        let selectedAvatar = `https://api.dicebear.com/7.x/notionists/svg?seed=${AVATAR_SEEDS[0]}`;
-        let currentTab = 'mail';
-        let activeRoomId = null;
-        let roomModalMode = 'join';
+        let selectedAvatar = `https://api.dicebear.com/7.x/notionists/svg?seed=Aria`;
+        let activeRoom = null;
 
-        // INITIALIZATION
+        // Initialization
         window.onload = () => {
-            initAvatarGrid();
+            const saved = localStorage.getItem('cp_db');
+            if (saved) db = JSON.parse(saved);
+            
+            initAvatars();
             checkSession();
             lucide.createIcons();
             
-            // Enter key listeners
-            document.getElementById('chat-input').addEventListener('keypress', (e) => {
-                if(e.key === 'Enter') sendChatMessage();
-            });
+            document.getElementById('chat-input').addEventListener('keypress', e => e.key === 'Enter' && sendMsg());
         };
 
+        function save() { localStorage.setItem('cp_db', JSON.stringify(db)); }
+
         function checkSession() {
-            const savedEmail = localStorage.getItem('cp_session_email');
-            if (savedEmail) {
-                const user = accounts.find(a => a.email === savedEmail);
-                if (user) {
-                    currentUser = user;
-                    showApp();
-                    return;
-                }
-            }
-            showLogin();
-        }
-
-        // AUTH LOGIC
-        function showLogin() {
-            document.getElementById('auth-overlay').classList.remove('hidden');
-            document.getElementById('login-container').classList.remove('hidden');
-            document.getElementById('register-container').classList.add('hidden');
-            
-            const listGrid = document.getElementById('accounts-grid');
-            if (accounts.length > 0) {
-                document.getElementById('accounts-list-section').classList.remove('hidden');
-                listGrid.innerHTML = accounts.map(acc => `
-                    <div onclick="loginAs('${acc.email}')" class="flex items-center gap-4 p-4 bg-blue-50 rounded-[1.5rem] cursor-pointer hover:bg-blue-600 hover:text-white group transition-all border border-blue-100">
-                        <img src="${acc.avatar}" class="w-10 h-10 rounded-xl bg-white shadow-sm">
-                        <div class="flex-1 overflow-hidden">
-                            <p class="font-black text-blue-900 group-hover:text-white truncate">${acc.name}</p>
-                            <p class="text-[9px] text-blue-400 group-hover:text-blue-100 font-black uppercase tracking-widest truncate">${acc.email}</p>
-                        </div>
-                    </div>`).join('');
+            const sid = localStorage.getItem('cp_sid');
+            if (sid) {
+                const user = db.users.find(u => u.email === sid);
+                if (user) login(user);
             } else {
-                document.getElementById('accounts-list-section').classList.add('hidden');
+                renderUserList();
             }
         }
 
-        function showRegistration() {
-            document.getElementById('login-container').classList.add('hidden');
-            document.getElementById('register-container').classList.remove('hidden');
-        }
-
-        function initAvatarGrid() {
-            const grid = document.getElementById('reg-avatar-grid');
-            grid.innerHTML = AVATAR_SEEDS.map((seed, idx) => {
-                const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}`;
-                return `
-                    <div onclick="selectAvatar('${url}', this)" class="avatar-option rounded-2xl bg-blue-50 p-2 ${idx === 0 ? 'selected' : ''}">
-                        <img src="${url}" class="w-full h-full">
-                    </div>
-                `;
+        function initAvatars() {
+            const grid = document.getElementById('avatar-grid');
+            grid.innerHTML = AVATARS.map((s, i) => {
+                const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${s}`;
+                return `<div onclick="selectAvatar('${url}', this)" class="avatar-box bg-slate-800/50 p-1.5 rounded-xl border-2 ${i===0?'selected':''}"><img src="${url}" class="w-full h-full rounded-lg"></div>`;
             }).join('');
         }
 
         function selectAvatar(url, el) {
-            document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-            el.classList.add('selected');
             selectedAvatar = url;
+            document.querySelectorAll('.avatar-box').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
         }
 
-        function handleRegister() {
+        function toggleRegister(show) {
+            document.getElementById('auth-card').classList.toggle('hidden', show);
+            document.getElementById('reg-modal').classList.toggle('hidden', !show);
+        }
+
+        function handleSignup() {
             const name = document.getElementById('reg-name').value.trim();
             const handle = document.getElementById('reg-handle').value.trim().toLowerCase();
-            if(!name || !handle) return;
-            
-            const email = handle.includes('@') ? handle : handle + "@connect.pro";
-            if(accounts.some(a => a.email === email)) return alert("ID already taken.");
-            
-            const newUser = { name, email, avatar: selectedAvatar };
-            accounts.push(newUser);
-            localStorage.setItem('cp_users', JSON.stringify(accounts));
-            loginAs(email);
+            if (!name || !handle) return;
+            const email = handle + "@connect.pro";
+            if (db.users.find(u => u.email === email)) return alert("ID Taken");
+            const user = { name, email, avatar: selectedAvatar };
+            db.users.push(user);
+            save();
+            login(user);
         }
 
-        function loginAs(email) {
-            const user = accounts.find(a => a.email === email);
-            if(!user) return;
+        function login(user) {
             currentUser = user;
-            localStorage.setItem('cp_session_email', email);
-            showApp();
-        }
-
-        function logout() {
-            localStorage.removeItem('cp_session_email');
-            location.reload();
-        }
-
-        function showApp() {
-            document.getElementById('auth-overlay').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('header-name').textContent = currentUser.name;
-            document.getElementById('header-avatar').src = currentUser.avatar;
-            
-            renderMailList();
-            renderRoomList();
-            setTab('mail');
-        }
-
-        // NAVIGATION
-        function setTab(tab) {
-            currentTab = tab;
-            const isMail = tab === 'mail';
-            
-            document.getElementById('view-mail').classList.toggle('hidden', !isMail);
-            document.getElementById('view-chat').classList.toggle('hidden', isMail);
-            
-            document.getElementById('mail-nav').classList.toggle('hidden', !isMail);
-            document.getElementById('chat-nav').classList.toggle('hidden', isMail);
-            
-            document.getElementById('tab-mail').className = isMail ? 
-                'w-full flex items-center gap-5 px-6 py-5 rounded-2xl transition-all font-black sidebar-active' : 
-                'w-full flex items-center gap-5 px-6 py-5 rounded-2xl transition-all font-black hover:bg-white/5';
-            
-            document.getElementById('tab-chat').className = !isMail ? 
-                'w-full flex items-center gap-5 px-6 py-5 rounded-2xl transition-all font-black sidebar-active' : 
-                'w-full flex items-center gap-5 px-6 py-5 rounded-2xl transition-all font-black hover:bg-white/5';
-            
+            localStorage.setItem('cp_sid', user.email);
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-interface').classList.remove('hidden');
+            document.getElementById('user-name').textContent = user.name;
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('user-avatar').src = user.avatar;
+            renderInbox();
+            renderRooms();
             lucide.createIcons();
         }
 
-        // MAIL LOGIC
-        function openCompose() { document.getElementById('modal-compose').classList.remove('hidden'); }
-        function closeCompose() { document.getElementById('modal-compose').classList.add('hidden'); }
+        function logout() {
+            localStorage.removeItem('cp_sid');
+            location.reload();
+        }
 
-        function sendMail() {
+        function renderUserList() {
+            const list = document.getElementById('user-list');
+            if (db.users.length > 0) {
+                document.getElementById('user-selector').classList.remove('hidden');
+                list.innerHTML = db.users.map(u => `
+                    <div onclick='login(${JSON.stringify(u)})' class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl cursor-pointer hover:bg-slate-700 transition-all border border-slate-700">
+                        <img src="${u.avatar}" class="w-8 h-8 rounded-lg bg-slate-900">
+                        <div class="text-left"><p class="text-xs font-bold">${u.name}</p><p class="text-[9px] text-slate-500">${u.email}</p></div>
+                    </div>`).join('');
+            }
+        }
+
+        function switchTab(tab) {
+            document.getElementById('view-mail').classList.toggle('hidden', tab !== 'mail');
+            document.getElementById('view-chat').classList.toggle('hidden', tab !== 'chat');
+            document.getElementById('btn-mail').className = `w-full p-4 rounded-xl flex items-center gap-4 transition-all font-bold ${tab==='mail'?'tab-active':'text-slate-400 hover:bg-slate-800'}`;
+            document.getElementById('btn-chat').className = `w-full p-4 rounded-xl flex items-center gap-4 transition-all font-bold ${tab==='chat'?'tab-active':'text-slate-400 hover:bg-slate-800'}`;
+            lucide.createIcons();
+        }
+
+        function openModal(id) {
+            document.getElementById('modal-container').classList.remove('hidden');
+            document.getElementById('modal-compose').classList.toggle('hidden', id !== 'compose');
+            document.getElementById('modal-room').classList.toggle('hidden', id !== 'room');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-container').classList.add('hidden');
+        }
+
+        function handleSendMail() {
             const to = document.getElementById('mail-to').value.trim();
-            const subject = document.getElementById('mail-subject').value.trim();
+            const sub = document.getElementById('mail-sub').value.trim();
             const body = document.getElementById('mail-body').value.trim();
-            
-            if(!to || !subject || !body) return;
-            
+            if (!to || !sub || !body) return;
             const fullTo = to.includes('@') ? to : to + "@connect.pro";
-            const newMail = {
-                id: Date.now(),
-                from: currentUser.email,
-                fromName: currentUser.name,
-                fromAvatar: currentUser.avatar,
-                to: fullTo,
-                subject,
-                body,
-                timestamp: new Date().toISOString()
-            };
-            
-            mails.push(newMail);
-            localStorage.setItem('cp_mails', JSON.stringify(mails));
-            
-            // Reset and close
-            document.getElementById('mail-to').value = '';
-            document.getElementById('mail-subject').value = '';
-            document.getElementById('mail-body').value = '';
-            closeCompose();
-            renderMailList();
+            db.mails.push({ id: Date.now(), from: currentUser.email, fromName: currentUser.name, fromAvatar: currentUser.avatar, to: fullTo, sub, body, date: new Date().toISOString() });
+            save();
+            closeModal();
+            renderInbox();
         }
 
-        function renderMailList() {
-            const list = document.getElementById('mail-list');
-            const myMails = mails.filter(m => m.to === currentUser.email).reverse();
-            
-            document.getElementById('mail-count').textContent = myMails.length;
-            
-            if(myMails.length === 0) {
-                list.innerHTML = `<p class="p-8 text-center text-blue-300 font-black text-[10px] uppercase tracking-widest">Inbox Silent</p>`;
-                return;
-            }
-            
-            list.innerHTML = myMails.map(m => `
-                <div onclick="viewMail(${m.id})" class="p-5 rounded-[2rem] bg-white cursor-pointer hover:bg-blue-50 border border-transparent transition-all">
-                    <div class="flex gap-4">
-                        <img src="${m.fromAvatar}" class="w-10 h-10 rounded-xl bg-blue-50">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs font-black text-blue-900 truncate">${m.fromName}</p>
-                            <p class="text-sm font-black text-blue-600 truncate leading-tight">${m.subject}</p>
-                            <p class="text-[11px] text-blue-400 font-medium truncate mt-1">${m.body}</p>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+        function renderInbox() {
+            const list = document.getElementById('inbox-list');
+            const myMails = db.mails.filter(m => m.to === currentUser.email).reverse();
+            list.innerHTML = myMails.length ? myMails.map(m => `
+                <div onclick="readMail(${m.id})" class="p-4 rounded-2xl bg-slate-900/50 hover:bg-slate-800 cursor-pointer border border-slate-800 transition-all">
+                    <p class="text-[10px] font-bold text-blue-400 mb-1">${m.fromName}</p>
+                    <p class="text-xs font-bold truncate">${m.sub}</p>
+                </div>`).join('') : '<p class="text-center text-[10px] text-slate-600 mt-10">NO TRANSMISSIONS</p>';
         }
 
-        function viewMail(id) {
-            const mail = mails.find(m => m.id === id);
-            if(!mail) return;
-            
-            document.getElementById('mail-welcome').classList.add('hidden');
-            const content = document.getElementById('mail-content');
+        function readMail(id) {
+            const m = db.mails.find(x => x.id === id);
+            document.getElementById('mail-reader-empty').classList.add('hidden');
+            const content = document.getElementById('mail-reader-content');
             content.classList.remove('hidden');
-            
-            content.innerHTML = `
-                <div class="mb-10">
-                    <h1 class="text-4xl font-black text-blue-900 leading-tight mb-8">${mail.subject}</h1>
-                    <div class="flex items-center gap-5 p-6 rounded-[2rem] bg-blue-50/50 border border-blue-100">
-                        <img src="${mail.fromAvatar}" class="w-12 h-12 rounded-xl bg-white">
-                        <div>
-                            <p class="font-black text-blue-900">${mail.fromName}</p>
-                            <p class="text-[10px] text-blue-400 font-black uppercase tracking-widest">${mail.from}</p>
-                        </div>
-                    </div>
+            content.innerHTML = `<h2 class="text-3xl font-black mb-6">${m.sub}</h2>
+                <div class="flex items-center gap-4 mb-8 p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                    <img src="${m.fromAvatar}" class="w-10 h-10 rounded-lg">
+                    <div><p class="font-bold text-sm">${m.fromName}</p><p class="text-[10px] text-slate-500">${m.from}</p></div>
                 </div>
-                <div class="text-blue-800 leading-relaxed text-lg whitespace-pre-wrap">${mail.body}</div>
-            `;
+                <div class="text-slate-300 leading-relaxed whitespace-pre-wrap">${m.body}</div>`;
         }
 
-        // CHAT LOGIC
-        function openRoomModal(mode) {
-            roomModalMode = mode;
-            document.getElementById('modal-room').classList.remove('hidden');
-            document.getElementById('room-modal-title').textContent = mode === 'create' ? 'Establish Node' : 'Access Node';
-            document.getElementById('room-confirm-btn').textContent = mode === 'create' ? 'Launch' : 'Connect';
-            document.getElementById('room-error').classList.add('hidden');
+        function handleRoomJoin() {
+            const name = document.getElementById('room-name').value.trim();
+            const key = document.getElementById('room-key').value.trim();
+            if (!name || !key) return;
+            let room = db.rooms.find(r => r.name.toLowerCase() === name.toLowerCase());
+            if (room && room.key !== key) return alert("Wrong Key");
+            if (!room) { room = { id: 'r'+Date.now(), name, key }; db.rooms.push(room); db.msgs[room.id] = []; }
+            save();
+            selectRoom(room.id);
+            closeModal();
         }
 
-        function closeRoomModal() {
-            document.getElementById('modal-room').classList.add('hidden');
-            document.getElementById('room-name-input').value = '';
-            document.getElementById('room-pass-input').value = '';
-        }
-
-        function handleRoomAction() {
-            const name = document.getElementById('room-name-input').value.trim();
-            const pass = document.getElementById('room-pass-input').value.trim();
-            if(!name || !pass) return;
-            
-            if(roomModalMode === 'create') {
-                const id = 'node_' + Date.now();
-                rooms.push({ id, name, pass });
-                messages[id] = [];
-                localStorage.setItem('cp_rooms', JSON.stringify(rooms));
-                localStorage.setItem('cp_messages', JSON.stringify(messages));
-                selectRoom(id);
-                closeRoomModal();
-            } else {
-                const room = rooms.find(r => r.name.toLowerCase() === name.toLowerCase() && r.pass === pass);
-                if(room) {
-                    selectRoom(room.id);
-                    closeRoomModal();
-                } else {
-                    document.getElementById('room-error').classList.remove('hidden');
-                }
-            }
-        }
-
-        function renderRoomList() {
-            const list = document.getElementById('rooms-list');
-            if(rooms.length === 0) {
-                list.innerHTML = `<p class="px-6 text-[9px] font-black text-blue-600/40 uppercase">No active nodes</p>`;
-                return;
-            }
-            
-            list.innerHTML = rooms.map(r => `
-                <button onclick="selectRoom('${r.id}')" class="w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${activeRoomId === r.id ? 'bg-blue-600 text-white' : 'text-blue-200 hover:bg-white/10'}">
-                    <i data-lucide="hash" class="w-3 h-3"></i>
-                    <span class="text-xs font-black truncate">${r.name}</span>
-                </button>
-            `).join('');
+        function renderRooms() {
+            const list = document.getElementById('room-list');
+            list.innerHTML = db.rooms.map(r => `
+                <div onclick="selectRoom('${r.id}')" class="p-4 rounded-xl cursor-pointer ${activeRoom===r.id?'bg-blue-600':'bg-slate-900/50 hover:bg-slate-800'} transition-all flex items-center gap-3">
+                    <i data-lucide="hash" class="w-4 h-4"></i><span class="text-xs font-bold">${r.name}</span>
+                </div>`).join('');
             lucide.createIcons();
         }
 
         function selectRoom(id) {
-            activeRoomId = id;
-            const room = rooms.find(r => r.id === id);
-            
-            document.getElementById('chat-welcome').classList.add('hidden');
+            activeRoom = id;
+            const room = db.rooms.find(r => r.id === id);
+            document.getElementById('chat-empty').classList.add('hidden');
             document.getElementById('chat-active').classList.remove('hidden');
-            document.getElementById('active-room-name').textContent = room.name;
-            
-            renderRoomList();
-            renderChatMessages();
-            if(currentTab !== 'chat') setTab('chat');
+            document.getElementById('active-room-title').textContent = room.name;
+            renderRooms();
+            renderMsgs();
         }
 
-        function sendChatMessage() {
+        function sendMsg() {
             const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if(!text || !activeRoomId) return;
-            
-            if(!messages[activeRoomId]) messages[activeRoomId] = [];
-            
-            messages[activeRoomId].push({
-                senderEmail: currentUser.email,
-                senderName: currentUser.name,
-                senderAvatar: currentUser.avatar,
-                text,
-                timestamp: new Date().toISOString()
-            });
-            
-            localStorage.setItem('cp_messages', JSON.stringify(messages));
+            const val = input.value.trim();
+            if (!val || !activeRoom) return;
+            if (!db.msgs[activeRoom]) db.msgs[activeRoom] = [];
+            db.msgs[activeRoom].push({ sender: currentUser.email, name: currentUser.name, avatar: currentUser.avatar, text: val });
+            save();
             input.value = '';
-            renderChatMessages();
+            renderMsgs();
         }
 
-        function renderChatMessages() {
+        function renderMsgs() {
             const container = document.getElementById('chat-messages');
-            const msgs = messages[activeRoomId] || [];
-            
+            const msgs = db.msgs[activeRoom] || [];
             container.innerHTML = msgs.map(m => {
-                const isMe = m.senderEmail === currentUser.email;
-                return `
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-pop">
-                        <div class="flex items-center gap-2 mb-2 px-1">
-                            ${!isMe ? `<img src="${m.senderAvatar}" class="w-5 h-5 rounded-lg bg-white">` : ''}
-                            <span class="text-[9px] font-black text-blue-400 uppercase tracking-widest">${m.senderName}</span>
-                        </div>
-                        <div class="max-w-[85%] px-6 py-4 text-sm font-bold ${isMe ? 'chat-bubble-me' : 'chat-bubble-them'}">
-                            ${m.text}
-                        </div>
-                    </div>
-                `;
+                const isMe = m.sender === currentUser.email;
+                return `<div class="flex flex-col ${isMe?'items-end':'items-start'}">
+                    <span class="text-[9px] font-bold text-slate-500 mb-1 px-2 uppercase">${m.name}</span>
+                    <div class="px-5 py-3 text-sm font-medium max-w-[80%] ${isMe?'msg-me text-white':'msg-them text-slate-200'}">${m.text}</div>
+                </div>`;
             }).join('');
-            
             container.scrollTop = container.scrollHeight;
         }
-
     </script>
 </body>
 </html>
