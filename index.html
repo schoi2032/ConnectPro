@@ -3,234 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ConnectMailPro</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m13 2-2 10h3L11 22l2-10h-3l2-10z'%3E%3C/path%3E%3C/svg%3E">
+    <title>ConnectMailPro | Professional Mail</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         
-        body {
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-main: #f8fafc;
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-main);
+            color: #0f172a;
         }
 
-        .email-item {
-            transition: all 0.2s ease;
-            border-left: 4px solid transparent;
+        .glass-sidebar {
+            background: #0f172a;
+            color: #94a3b8;
         }
 
-        .email-item.active {
-            background-color: white !important;
-            border-left: 4px solid #2563eb;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        .active-nav {
+            background: rgba(37, 99, 235, 0.15);
+            color: #60a5fa;
+            border-right: 3px solid #3b82f6;
         }
 
-        .email-item.unread .subject-text,
-        .email-item.unread .sender-text {
-            font-weight: 800 !important;
-            color: #0f172a !important;
+        .mail-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom: 1px solid #f1f5f9;
         }
+
+        .mail-card:hover {
+            background-color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px -2px rgba(0,0,0,0.05);
+        }
+
+        .mail-card.selected {
+            background-color: #ffffff;
+            border-left: 4px solid var(--primary);
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in { animation: fadeIn 0.3s ease-out forwards; }
         
-        .email-item.unread .dot-indicator {
-            display: block;
-        }
-
-        .modal-overlay {
-            background-color: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(4px);
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .animate-slide-up {
-            animation: slideUp 0.3s ease-out forwards;
-        }
-
-        .avatar-option {
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 3px solid transparent;
-            border-radius: 1rem;
-            overflow: hidden;
-        }
-
-        .avatar-option:hover {
-            transform: scale(1.05);
-        }
-
-        .avatar-option.selected {
-            border-color: #2563eb;
-            background-color: #eff6ff;
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 h-screen">
+<body class="h-screen overflow-hidden">
 
-    <!-- Registration/Profile Overlay -->
-    <div id="registration-overlay" class="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl animate-slide-up overflow-y-auto max-h-[90vh] custom-scrollbar text-center">
-            <div class="flex flex-col items-center mb-6">
-                <div class="bg-blue-600 p-4 rounded-2xl text-white mb-4 shadow-lg shadow-blue-200">
-                    <i data-lucide="user-round" class="w-8 h-8"></i>
+    <!-- Auth / Setup Screen -->
+    <div id="setup-screen" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-md rounded-[2rem] p-8 shadow-2xl animate-in">
+            <div class="flex flex-col items-center text-center mb-8">
+                <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mb-4 shadow-xl shadow-blue-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                 </div>
-                <h1 id="reg-title" class="text-2xl font-bold text-slate-900">Setup Your Profile</h1>
-                <p class="text-slate-500 mt-1 text-sm">Pick a look that matches your personality.</p>
+                <h1 class="text-2xl font-bold text-slate-900">ConnectMailPro</h1>
+                <p class="text-slate-500 text-sm mt-1">Set up your local professional identity</p>
             </div>
-            
-            <div class="space-y-6 text-left">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Your Name</label>
-                        <input type="text" id="reg-name" placeholder="Alex Smith" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Email Handle</label>
-                        <div class="relative">
-                            <input type="text" id="reg-email" placeholder="alex" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-32">
-                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-xs">@connect.pro</span>
-                        </div>
-                    </div>
-                </div>
 
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-3">Choose Your Avatar</label>
-                    <!-- Category Tabs -->
-                    <div class="flex gap-2 mb-4 overflow-x-auto pb-2 custom-scrollbar">
-                        <button onclick="changeAvatarCategory('avataaars')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-bold bg-blue-600 text-white whitespace-nowrap">People</button>
-                        <button onclick="changeAvatarCategory('bottts')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Robots</button>
-                        <button onclick="changeAvatarCategory('identicon')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Abstract</button>
-                    </div>
-                    <div id="avatar-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-3">
-                        <!-- Avatars will be injected here -->
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Display Name</label>
+                    <input type="text" id="setup-name" placeholder="E.g. Alex Rivera" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">Mail Handle</label>
+                    <div class="relative">
+                        <input type="text" id="setup-handle" placeholder="username" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium pr-32">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">@connect.pro</span>
                     </div>
                 </div>
-
-                <div class="flex gap-3">
-                    <button id="cancel-reg-btn" onclick="hideRegistration()" class="hidden flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-xl transition-all">
-                        Cancel
-                    </button>
-                    <button onclick="saveUserProfile()" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-200">
-                        Save Changes
-                    </button>
-                </div>
+                <button onclick="finishSetup()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all mt-4">
+                    Lock In & Start
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="main-app" class="hidden flex h-full w-full">
+    <!-- Main Application -->
+    <div id="app-container" class="hidden flex h-full w-full opacity-0 transition-opacity duration-500">
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 transition-all duration-300 flex flex-col border-r border-slate-800 shrink-0">
-            <div class="p-6 flex items-center gap-3">
-                <div class="bg-blue-600 p-2 rounded-lg text-white">
-                    <i data-lucide="zap" class="w-6 h-6"></i>
+        <aside class="w-72 glass-sidebar flex flex-col shrink-0">
+            <div class="p-8 flex items-center gap-3">
+                <div class="text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                 </div>
-                <span class="sidebar-text font-bold text-xl text-white tracking-tight">ConnectMail</span>
+                <span class="font-bold text-xl text-white tracking-tight">ConnectMail</span>
             </div>
 
-            <div class="px-4 mb-6">
-                <button onclick="toggleCompose(true)" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl transition-all shadow-lg shadow-blue-900/20 w-full py-3 px-4">
-                    <i data-lucide="plus"></i>
-                    <span class="sidebar-text font-medium">Compose</span>
+            <div class="px-6 mb-8">
+                <button onclick="openCompose()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-900/40 transition-all active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    New Message
                 </button>
             </div>
 
-            <nav class="flex-1 px-3 space-y-1">
-                <button onclick="switchFolder('inbox')" id="btn-inbox" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-colors bg-blue-600/10 text-blue-400">
-                    <i data-lucide="inbox" class="w-5 h-5"></i>
-                    <span class="sidebar-text font-medium text-sm">Inbox</span>
+            <nav class="flex-1 px-4 space-y-1">
+                <button onclick="switchFolder('inbox')" id="nav-inbox" class="active-nav w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                    <span class="text-sm font-semibold">Inbox</span>
+                    <span id="unread-count" class="ml-auto bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span>
                 </button>
-                <button onclick="switchFolder('sent')" id="btn-sent" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-colors hover:bg-slate-800 text-slate-400">
-                    <i data-lucide="send" class="w-5 h-5"></i>
-                    <span class="sidebar-text font-medium text-sm">Sent</span>
-                </button>
-                <button onclick="switchFolder('starred')" id="btn-starred" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-colors hover:bg-slate-800 text-slate-400">
-                    <i data-lucide="star" class="w-5 h-5"></i>
-                    <span class="sidebar-text font-medium text-sm">Starred</span>
+                <button onclick="switchFolder('sent')" id="nav-sent" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    <span class="text-sm font-semibold">Sent</span>
                 </button>
             </nav>
 
-            <div class="p-4 border-t border-slate-800 bg-slate-900/50 group">
+            <div class="p-6 bg-white/5 mt-auto border-t border-white/5">
                 <div class="flex items-center gap-3">
-                    <div class="relative cursor-pointer" onclick="showRegistration(true)">
-                        <img id="display-avatar" src="" class="w-10 h-10 rounded-xl bg-slate-700 border border-slate-700 object-cover" alt="Me">
-                        <div class="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i data-lucide="edit-3" class="w-4 h-4 text-white"></i>
-                        </div>
-                    </div>
-                    <div class="sidebar-text flex flex-col min-w-0 flex-1">
-                        <span id="display-name" class="text-xs font-semibold text-white truncate">User Name</span>
-                        <span id="display-email" class="text-[10px] text-slate-500 truncate">email@connect.pro</span>
+                    <div id="user-avatar-small" class="avatar-circle bg-blue-500 text-sm">??</div>
+                    <div class="flex flex-col min-w-0">
+                        <span id="user-name-display" class="text-xs font-bold text-white truncate">User</span>
+                        <span id="user-email-display" class="text-[10px] text-slate-500 truncate">handle@connect.pro</span>
                     </div>
                 </div>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col min-w-0 bg-white">
-            <header class="h-16 border-b border-slate-100 flex items-center justify-between px-6 bg-white z-10 shrink-0">
-                <div class="flex items-center gap-4 flex-1">
-                    <button onclick="toggleSidebar()" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500">
-                        <i data-lucide="menu" class="w-5 h-5"></i>
-                    </button>
-                    <h2 id="folder-title" class="font-bold text-lg text-slate-800 capitalize">Inbox</h2>
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- Header -->
+            <header class="h-20 bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <h2 id="current-folder-name" class="text-xl font-bold text-slate-900">Inbox</h2>
+                    <div class="h-5 w-[1px] bg-slate-200 mx-2"></div>
+                    <div class="flex items-center gap-1 text-green-500 font-bold text-[10px] uppercase tracking-widest">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                        Client Direct
+                    </div>
                 </div>
-                <button onclick="resetApp()" class="text-xs text-slate-400 hover:text-red-500 transition-colors">Log Out / Reset</button>
+                <div class="flex items-center gap-4">
+                    <button onclick="clearAllData()" class="text-[10px] font-bold text-slate-400 hover:text-red-500 uppercase tracking-tighter">Reset All</button>
+                </div>
             </header>
 
-            <div class="flex-1 flex overflow-hidden relative">
-                <!-- List -->
-                <section id="list-panel" class="w-full lg:w-[380px] border-r border-slate-100 flex flex-col bg-slate-50/50 shrink-0 z-10 transition-transform duration-300">
-                    <div id="email-list" class="flex-1 overflow-y-auto custom-scrollbar">
-                        <!-- Emails loaded here -->
+            <div class="flex-1 flex overflow-hidden">
+                <!-- List Panel -->
+                <section class="w-96 border-r border-slate-200 flex flex-col bg-slate-50/50 shrink-0">
+                    <div id="mail-list" class="flex-1 overflow-y-auto custom-scroll">
+                        <!-- Items injected here -->
                     </div>
                 </section>
 
-                <!-- Reader -->
-                <section id="reader-panel" class="absolute inset-0 bg-white lg:relative lg:flex flex-1 flex-col overflow-y-auto custom-scrollbar translate-x-full lg:translate-x-0 transition-transform duration-300 z-20">
-                    <div id="empty-view" class="flex-1 flex flex-col items-center justify-center text-slate-300 p-12">
-                        <i data-lucide="mail-open" class="w-16 h-16 mb-4 opacity-20"></i>
-                        <p class="font-medium text-slate-400 text-center">Select an email to view it here</p>
+                <!-- Reader Panel -->
+                <section class="flex-1 bg-white overflow-y-auto custom-scroll">
+                    <div id="no-selection" class="h-full flex flex-col items-center justify-center p-12 text-center">
+                        <div class="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200 mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        </div>
+                        <h3 class="font-bold text-slate-900">No message selected</h3>
+                        <p class="text-sm text-slate-400 mt-1">Select a thread from the list to read its content.</p>
                     </div>
-                    <div id="active-view" class="hidden flex flex-col h-full animate-slide-up">
-                        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-20">
-                            <div class="flex items-center gap-2">
-                                <button onclick="closeReader()" class="flex items-center gap-1 px-3 py-2 text-blue-600 font-bold hover:bg-blue-50 rounded-xl transition-colors lg:hidden">
-                                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                                    <span>Back</span>
-                                </button>
-                                <div class="h-6 w-px bg-slate-200 mx-2 lg:hidden"></div>
-                                <button onclick="deleteCurrentEmail()" class="p-2 hover:bg-red-50 text-red-400 rounded-lg" title="Delete"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-                                <button onclick="toggleStarCurrent()" id="star-btn" class="p-2 hover:bg-slate-100 rounded-lg" title="Star"><i data-lucide="star" class="w-5 h-5"></i></button>
+
+                    <div id="reader-content" class="hidden p-12 max-w-4xl mx-auto animate-in">
+                        <h1 id="read-subject" class="text-3xl font-extrabold text-slate-900 mb-8 leading-tight">Subject Line</h1>
+                        <div class="flex items-center gap-4 mb-8 pb-8 border-b border-slate-100">
+                            <div id="read-avatar" class="avatar-circle bg-slate-900 h-12 w-12 text-lg">?</div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p id="read-from-name" class="font-bold text-slate-900">Sender Name</p>
+                                        <p id="read-from-email" class="text-xs text-slate-500 font-medium"></p>
+                                    </div>
+                                    <span id="read-date" class="text-[10px] font-bold text-slate-400 uppercase">Just now</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="p-6 lg:p-12 max-w-3xl mx-auto w-full">
-                            <h1 id="view-subject" class="text-2xl lg:text-4xl font-bold text-slate-900 mb-6 leading-tight">Subject Line</h1>
-                            <div class="flex items-center gap-4 mb-8 pb-8 border-b border-slate-50">
-                                <img id="view-avatar-img" class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-blue-100 border border-slate-100 shadow-sm object-cover" src="">
-                                <div class="min-w-0">
-                                    <p id="view-from" class="font-bold text-slate-900 text-lg truncate">Sender Name</p>
-                                    <p class="text-xs text-slate-500">to <span id="view-to-me" class="font-medium text-blue-600">me</span></p>
-                                </div>
-                                <span id="view-date" class="ml-auto text-xs text-slate-400 italic shrink-0">Date</span>
-                            </div>
-                            <div id="view-body" class="text-slate-700 leading-relaxed whitespace-pre-wrap text-base lg:text-lg">
-                                Message body content...
-                            </div>
+                        <div id="read-body" class="text-slate-700 leading-relaxed whitespace-pre-wrap text-lg">
+                            Message content goes here...
                         </div>
                     </div>
                 </section>
@@ -239,333 +202,281 @@
     </div>
 
     <!-- Compose Modal -->
-    <div id="compose-modal" class="hidden fixed inset-0 z-[110] modal-overlay flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up">
-            <div class="bg-slate-900 text-white p-5 flex justify-between items-center">
-                <span class="font-bold">Compose Message</span>
-                <button onclick="toggleCompose(false)" class="hover:bg-white/20 p-1 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <div id="compose-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeCompose()"></div>
+        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative animate-in overflow-hidden flex flex-col">
+            <div class="p-8 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </div>
+                    <h2 class="font-bold text-xl text-slate-900">New Message</h2>
+                </div>
+                <button onclick="closeCompose()" class="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
             </div>
-            <div class="p-6 space-y-4">
-                <input id="to-email" type="text" placeholder="Recipient (e.g. friend@connect.pro)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                <input id="to-subject" type="text" placeholder="Subject" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                <textarea id="to-body" placeholder="Write your message here..." class="w-full h-48 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
+            
+            <div class="p-8 space-y-6">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">To Recipient</label>
+                    <div class="relative">
+                        <input id="comp-to" type="text" placeholder="username" class="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium pr-32 bg-slate-50/50">
+                        <span class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">@connect.pro</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Subject</label>
+                    <input id="comp-subject" type="text" placeholder="Meeting Notes" class="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium bg-slate-50/50">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Message</label>
+                    <textarea id="comp-body" placeholder="Hi there..." class="w-full h-48 px-5 py-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium bg-slate-50/50 resize-none"></textarea>
+                </div>
             </div>
-            <div class="p-4 bg-slate-50 flex justify-end gap-3">
-                <button onclick="toggleCompose(false)" class="px-6 py-2 text-slate-500 font-medium hover:text-slate-700">Cancel</button>
-                <button onclick="sendMail()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-xl font-bold transition-all shadow-lg shadow-blue-100">Send Now</button>
+
+            <div class="p-8 bg-slate-50 border-t border-slate-100 flex justify-end gap-4">
+                <button onclick="closeCompose()" class="px-6 py-3 rounded-xl font-bold text-slate-500 hover:text-slate-800 transition-colors">Discard</button>
+                <button onclick="sendMail()" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3.5 rounded-xl font-bold shadow-lg shadow-blue-200 flex items-center gap-2 transition-all active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    Send Now
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        const avatarSeeds = {
-            'avataaars': ['Felix', 'Aneka', 'Caleb', 'Elsa', 'Jasper', 'Milo', 'Luna', 'Oliver', 'Toby', 'Zoe', 'Buster', 'Pepper'],
-            'bottts': ['Gears', 'Sparky', 'Bolt', 'Circuit', 'Beep', 'Bop', 'Mecha', 'Droid', 'Chip', 'Byte'],
-            'identicon': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
-        };
-        
-        let activeCategory = 'avataaars';
-        let selectedAvatarUrl = '';
-
         // State Management
-        let userProfile = JSON.parse(localStorage.getItem('connect_user')) || null;
-        let mails = JSON.parse(localStorage.getItem('connect_mails')) || [];
+        let currentUser = null;
+        let mails = [];
         let activeFolder = 'inbox';
         let selectedMailId = null;
 
+        // Colors for avatars
+        const avatarColors = ['#2563eb', '#7c3aed', '#db2777', '#dc2626', '#ea580c', '#16a34a', '#0891b2'];
+
+        // Core Functions
         function init() {
-            if (userProfile) {
-                document.getElementById('registration-overlay').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                updateUI();
-                renderList();
-            } else {
-                showRegistration(false);
+            const savedUser = localStorage.getItem('cp_user');
+            const savedMails = localStorage.getItem('cp_mails');
+
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                mails = savedMails ? JSON.parse(savedMails) : [];
+                startApp();
             }
-            lucide.createIcons();
         }
 
-        function showRegistration(isEditing = false) {
-            const overlay = document.getElementById('registration-overlay');
-            const title = document.getElementById('reg-title');
-            const cancelBtn = document.getElementById('cancel-reg-btn');
-            
-            overlay.classList.remove('hidden');
-            
-            if (isEditing) {
-                title.textContent = "Edit Your Profile";
-                cancelBtn.classList.remove('hidden');
-                document.getElementById('reg-name').value = userProfile.name;
-                document.getElementById('reg-email').value = userProfile.email.split('@')[0];
-                selectedAvatarUrl = userProfile.avatar;
-            } else {
-                title.textContent = "Setup Your Profile";
-                cancelBtn.classList.add('hidden');
-                selectedAvatarUrl = `https://api.dicebear.com/7.x/${activeCategory}/svg?seed=${avatarSeeds[activeCategory][0]}`;
-            }
-            
-            renderAvatarGrid();
-        }
+        function finishSetup() {
+            const name = document.getElementById('setup-name').value.trim();
+            const handle = document.getElementById('setup-handle').value.trim().toLowerCase();
 
-        function hideRegistration() {
-            document.getElementById('registration-overlay').classList.add('hidden');
-        }
+            if (!name || !handle) return;
 
-        function changeAvatarCategory(cat) {
-            activeCategory = cat;
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('bg-slate-100', 'text-slate-600');
-            });
-            event.target.classList.add('bg-blue-600', 'text-white');
-            event.target.classList.remove('bg-slate-100', 'text-slate-600');
-            renderAvatarGrid();
-        }
-
-        function renderAvatarGrid() {
-            const grid = document.getElementById('avatar-grid');
-            if (!grid) return;
-            
-            grid.innerHTML = avatarSeeds[activeCategory].map(seed => {
-                const url = `https://api.dicebear.com/7.x/${activeCategory}/svg?seed=${seed}`;
-                return `
-                    <div class="avatar-option rounded-xl p-1 ${url === selectedAvatarUrl ? 'selected' : ''}" 
-                         onclick="selectAvatar('${url}')">
-                        <img src="${url}" class="w-full h-auto rounded-lg">
-                    </div>
-                `;
-            }).join('');
-        }
-
-        window.selectAvatar = (url) => {
-            selectedAvatarUrl = url;
-            renderAvatarGrid();
-        };
-
-        window.saveUserProfile = () => {
-            const name = document.getElementById('reg-name').value.trim();
-            const emailHandle = document.getElementById('reg-email').value.trim().toLowerCase();
-
-            if (!name || !emailHandle) return;
-
-            userProfile = { 
-                name, 
-                email: emailHandle + "@connect.pro",
-                avatar: selectedAvatarUrl
+            currentUser = {
+                name: name,
+                handle: handle,
+                email: handle + '@connect.pro',
+                color: avatarColors[Math.floor(Math.random() * avatarColors.length)]
             };
 
-            localStorage.setItem('connect_user', JSON.stringify(userProfile));
+            localStorage.setItem('cp_user', JSON.stringify(currentUser));
             
-            if (mails.length === 0) {
-                mails.push({
-                    id: Date.now(),
-                    from: "Connect Support",
-                    fromEmail: "support@connect.pro",
-                    fromAvatar: `https://api.dicebear.com/7.x/bottts/svg?seed=Support`,
-                    to: userProfile.email,
-                    subject: "Welcome to ConnectMailPro!",
-                    body: `Hi ${name},\n\nWelcome to ConnectMailPro! This is your local private workspace for messaging.\n\nYou can now send emails to anyone else, or even to yourself to save notes.\n\nHappy connecting!`,
-                    date: new Date().toLocaleString(),
-                    starred: false,
-                    read: false
-                });
-                localStorage.setItem('connect_mails', JSON.stringify(mails));
-            }
-
-            hideRegistration();
-            document.getElementById('main-app').classList.remove('hidden');
-            updateUI();
-            renderList();
-        };
-
-        function updateUI() {
-            if (!userProfile) return;
-            document.getElementById('display-name').textContent = userProfile.name;
-            document.getElementById('display-email').textContent = userProfile.email;
-            document.getElementById('display-avatar').src = userProfile.avatar;
+            // Add a welcome email
+            const welcomeEmail = {
+                id: Date.now(),
+                senderName: "System Administrator",
+                senderEmail: "admin@connect.pro",
+                senderColor: "#0f172a",
+                recipient: currentUser.email,
+                subject: "Welcome to ConnectMailPro",
+                body: `Hello ${name},\n\nWelcome to your new professional mailbox. This application works entirely in your browser. \n\nYou can send messages to anyone with a @connect.pro handle. Since this is a direct simulation, messages you send to yourself will appear in your inbox instantly!\n\nBest regards,\nThe ConnectMail Team`,
+                date: new Date().toISOString(),
+                unread: true
+            };
+            
+            mails = [welcomeEmail];
+            localStorage.setItem('cp_mails', JSON.stringify(mails));
+            
+            startApp();
         }
 
-        window.switchFolder = (folder) => {
-            activeFolder = folder;
-            document.getElementById('folder-title').textContent = folder;
+        function startApp() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            const container = document.getElementById('app-container');
+            container.classList.remove('hidden');
+            setTimeout(() => container.style.opacity = '1', 10);
+
+            // Set UI details
+            document.getElementById('user-name-display').textContent = currentUser.name;
+            document.getElementById('user-email-display').textContent = currentUser.email;
             
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600/10', 'text-blue-400');
-                btn.classList.add('hover:bg-slate-800', 'text-slate-400');
-            });
-            const activeBtn = document.getElementById(`btn-${folder}`);
-            if (activeBtn) {
-                activeBtn.classList.add('bg-blue-600/10', 'text-blue-400');
-                activeBtn.classList.remove('hover:bg-slate-800', 'text-slate-400');
-            }
+            const smallAvatar = document.getElementById('user-avatar-small');
+            smallAvatar.textContent = currentUser.name.charAt(0);
+            smallAvatar.style.backgroundColor = currentUser.color;
 
-            closeReader();
-        };
+            renderMailList();
+        }
 
-        window.toggleSidebar = () => {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('w-64');
-            sidebar.classList.toggle('w-20');
-            document.querySelectorAll('.sidebar-text').forEach(t => t.classList.toggle('hidden'));
-        };
-
-        function renderList() {
-            const listContainer = document.getElementById('email-list');
-            if (!listContainer) return;
-            listContainer.innerHTML = '';
+        function renderMailList() {
+            const list = document.getElementById('mail-list');
+            list.innerHTML = '';
 
             const filtered = mails.filter(m => {
-                if (activeFolder === 'inbox') return m.to === userProfile.email;
-                if (activeFolder === 'sent') return m.fromEmail === userProfile.email;
-                if (activeFolder === 'starred') return m.starred;
-                return true;
-            }).reverse();
+                if (activeFolder === 'inbox') return m.recipient === currentUser.email;
+                if (activeFolder === 'sent') return m.senderEmail === currentUser.email;
+                return false;
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
 
             if (filtered.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="flex flex-col items-center justify-center p-12 text-center text-slate-300">
-                        <i data-lucide="ghost" class="w-12 h-12 mb-2 opacity-20"></i>
-                        <p class="text-sm">Empty folder</p>
+                list.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full opacity-30 p-12 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="mb-4"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        <p class="font-bold text-xs uppercase tracking-widest">Folder Empty</p>
                     </div>
                 `;
-                lucide.createIcons();
                 return;
             }
 
             filtered.forEach(m => {
-                const item = document.createElement('div');
-                item.className = `p-4 border-b border-slate-100 cursor-pointer transition-all hover:bg-white email-item ${selectedMailId === m.id ? 'active' : ''} ${!m.read ? 'unread' : ''}`;
-                item.setAttribute('onclick', `window.openMail(${m.id})`);
-                
-                item.innerHTML = `
-                    <div class="flex gap-3 pointer-events-none relative">
-                        <div class="dot-indicator hidden absolute -left-1 top-0 w-2 h-2 bg-blue-600 rounded-full"></div>
-                        <img src="${m.fromAvatar}" class="w-10 h-10 rounded-xl bg-slate-100 flex-shrink-0 object-cover">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-start mb-0.5">
-                                <span class="sender-text text-sm truncate text-slate-600">${m.from}</span>
-                                <span class="text-[10px] text-slate-400 whitespace-nowrap">${m.date.split(',')[1] || m.date}</span>
-                            </div>
-                            <h4 class="subject-text text-xs font-semibold truncate text-slate-700">${m.subject}</h4>
-                            <p class="text-xs text-slate-400 truncate mt-0.5">${m.body}</p>
+                const isSelected = selectedMailId === m.id;
+                const div = document.createElement('div');
+                div.className = `mail-card p-6 cursor-pointer ${isSelected ? 'selected' : ''}`;
+                div.onclick = () => selectMail(m);
+
+                const timeStr = new Date(m.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const name = activeFolder === 'inbox' ? m.senderName : `To: ${m.recipient.split('@')[0]}`;
+                const unreadClass = (activeFolder === 'inbox' && m.unread) ? 'font-bold' : '';
+
+                div.innerHTML = `
+                    <div class="flex gap-4">
+                        <div class="avatar-circle shrink-0" style="background-color: ${m.senderColor || '#94a3b8'}">
+                            ${name.charAt(0)}
                         </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <span class="text-xs ${unreadClass ? 'text-slate-900' : 'text-slate-500'} truncate">${name}</span>
+                                <span class="text-[10px] font-bold text-slate-400">${timeStr}</span>
+                            </div>
+                            <h4 class="text-xs ${unreadClass ? 'font-extrabold text-slate-900' : 'font-semibold text-slate-700'} truncate">${m.subject}</h4>
+                            <p class="text-[11px] text-slate-400 truncate mt-1 leading-tight">${m.body.substring(0, 60)}...</p>
+                        </div>
+                        ${unreadClass ? '<div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>' : ''}
                     </div>
                 `;
-                listContainer.appendChild(item);
+                list.appendChild(div);
             });
-            lucide.createIcons();
+
+            updateUnreadCount();
         }
 
-        window.openMail = (id) => {
-            const mail = mails.find(m => m.id === id);
-            if (!mail) return;
-
-            selectedMailId = id;
-            mail.read = true; 
-            localStorage.setItem('connect_mails', JSON.stringify(mails));
-
-            const readerPanel = document.getElementById('reader-panel');
-            readerPanel.classList.remove('translate-x-full');
+        function selectMail(mail) {
+            selectedMailId = mail.id;
             
-            document.getElementById('empty-view').classList.add('hidden');
-            const view = document.getElementById('active-view');
-            view.classList.remove('hidden');
+            // Mark as read
+            if (mail.unread && activeFolder === 'inbox') {
+                mail.unread = false;
+                localStorage.setItem('cp_mails', JSON.stringify(mails));
+            }
 
-            document.getElementById('view-subject').textContent = mail.subject;
-            document.getElementById('view-from').textContent = `${mail.from} <${mail.fromEmail}>`;
-            document.getElementById('view-to-me').textContent = mail.to === userProfile.email ? 'me' : mail.to;
-            document.getElementById('view-body').textContent = mail.body;
-            document.getElementById('view-date').textContent = mail.date;
-            document.getElementById('view-avatar-img').src = mail.fromAvatar;
-            
-            const starBtn = document.getElementById('star-btn');
-            starBtn.className = `p-2 hover:bg-slate-100 rounded-lg ${mail.starred ? 'text-amber-400' : 'text-slate-400'}`;
-            starBtn.innerHTML = `<i data-lucide="star" class="w-5 h-5" ${mail.starred ? 'fill="currentColor"' : ''}></i>`;
-            
-            lucide.createIcons();
-            renderList();
-        };
+            renderMailList();
 
-        window.closeReader = () => {
-            const readerPanel = document.getElementById('reader-panel');
-            readerPanel.classList.add('translate-x-full');
+            document.getElementById('no-selection').classList.add('hidden');
+            const reader = document.getElementById('reader-content');
+            reader.classList.remove('hidden');
+            reader.classList.remove('animate-in');
+            void reader.offsetWidth; // Trigger reflow
+            reader.classList.add('animate-in');
+
+            document.getElementById('read-subject').textContent = mail.subject;
+            document.getElementById('read-from-name').textContent = mail.senderName;
+            document.getElementById('read-from-email').textContent = `<${mail.senderEmail}>`;
+            document.getElementById('read-body').textContent = mail.body;
+            document.getElementById('read-date').textContent = new Date(mail.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+            
+            const avatar = document.getElementById('read-avatar');
+            avatar.textContent = mail.senderName.charAt(0);
+            avatar.style.backgroundColor = mail.senderColor;
+        }
+
+        function switchFolder(folder) {
+            activeFolder = folder;
             selectedMailId = null;
-            setTimeout(() => {
-                document.getElementById('active-view').classList.add('hidden');
-                document.getElementById('empty-view').classList.remove('hidden');
-            }, 300);
-            renderList();
-        };
+            
+            // Update Nav UI
+            document.getElementById('nav-inbox').className = folder === 'inbox' ? 'active-nav w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all' : 'w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all';
+            document.getElementById('nav-sent').className = folder === 'sent' ? 'active-nav w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all' : 'w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all';
+            
+            document.getElementById('current-folder-name').textContent = folder === 'inbox' ? 'Inbox' : 'Sent Items';
+            
+            document.getElementById('reader-content').classList.add('hidden');
+            document.getElementById('no-selection').classList.remove('hidden');
+            
+            renderMailList();
+        }
 
-        window.toggleCompose = (show) => {
-            document.getElementById('compose-modal').classList.toggle('hidden', !show);
-        };
+        function openCompose() {
+            document.getElementById('compose-modal').classList.remove('hidden');
+        }
 
-        window.sendMail = () => {
-            const toInput = document.getElementById('to-email');
-            const subInput = document.getElementById('to-subject');
-            const bodyInput = document.getElementById('to-body');
+        function closeCompose() {
+            document.getElementById('compose-modal').classList.add('hidden');
+            document.getElementById('comp-to').value = '';
+            document.getElementById('comp-subject').value = '';
+            document.getElementById('comp-body').value = '';
+        }
 
-            const to = toInput.value.trim();
-            const subject = subInput.value.trim();
-            const body = bodyInput.value.trim();
+        function sendMail() {
+            const to = document.getElementById('comp-to').value.trim().toLowerCase();
+            const subject = document.getElementById('comp-subject').value.trim();
+            const body = document.getElementById('comp-body').value.trim();
 
             if (!to || !subject || !body) return;
 
-            const recipientEmail = to.includes('@') ? to : to + "@connect.pro";
+            const fullTo = to.includes('@') ? to : to + '@connect.pro';
 
             const newMail = {
                 id: Date.now(),
-                from: userProfile.name,
-                fromEmail: userProfile.email,
-                fromAvatar: userProfile.avatar,
-                to: recipientEmail,
-                subject,
-                body,
-                date: new Date().toLocaleString(),
-                starred: false,
-                read: true
+                senderName: currentUser.name,
+                senderEmail: currentUser.email,
+                senderColor: currentUser.color,
+                recipient: fullTo,
+                subject: subject,
+                body: body,
+                date: new Date().toISOString(),
+                unread: true
             };
 
             mails.push(newMail);
-            localStorage.setItem('connect_mails', JSON.stringify(mails));
-            
-            window.toggleCompose(false);
-            toInput.value = '';
-            subInput.value = '';
-            bodyInput.value = '';
+            localStorage.setItem('cp_mails', JSON.stringify(mails));
 
-            renderList();
+            closeCompose();
             
-            // If user is in Sent folder, they should see it immediately
-            if (activeFolder === 'sent') {
-                renderList();
+            // Switch to sent folder to see the result
+            switchFolder('sent');
+            selectMail(newMail);
+        }
+
+        function updateUnreadCount() {
+            const count = mails.filter(m => m.recipient === currentUser.email && m.unread).length;
+            const badge = document.getElementById('unread-count');
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
             }
-        };
+        }
 
-        window.deleteCurrentEmail = () => {
-            if (!selectedMailId) return;
-            mails = mails.filter(m => m.id !== selectedMailId);
-            localStorage.setItem('connect_mails', JSON.stringify(mails));
-            window.closeReader();
-        };
-
-        window.toggleStarCurrent = () => {
-            if (!selectedMailId) return;
-            const idx = mails.findIndex(m => m.id === selectedMailId);
-            mails[idx].starred = !mails[idx].starred;
-            localStorage.setItem('connect_mails', JSON.stringify(mails));
-            window.openMail(selectedMailId);
-        };
-
-        window.resetApp = () => {
-            if(confirm("Delete profile and all local data?")) {
+        function clearAllData() {
+            if(confirm("Are you sure? This will wipe your profile and all messages.")) {
                 localStorage.clear();
                 location.reload();
             }
-        };
+        }
 
-        document.addEventListener('DOMContentLoaded', init);
+        // Run app
+        init();
     </script>
 </body>
 </html>
